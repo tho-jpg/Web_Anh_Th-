@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm 10 câu: Năng lực sáng tạo - Ngữ Văn 12</title>
+    <style>
+        :root {
+            /* Hệ màu chuẩn Gen Z: Năng động, rực rỡ, hơi hướng Cyberpunk / Y2K */
+            --primary-gradient: linear-gradient(135deg, #7f00ff, #ff007f);
+            --success-color: #00ff66;
+            --success-bg: #d4fce5;
+            --error-color: #ff3366;
+            --error-bg: #ffe5ec;
+            --bg-gradient: linear-gradient(120deg, #0f172a 0%, #1e1b4b 100%);
+            --card-color: #252542;
+            --text-color: #ffffff;
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 95vh;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-color);
+            border-radius: 24px; /* Bo góc cực mạnh kiểu hiện đại */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 50px rgba(127, 0, 255, 0.2);
+            padding: 35px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 22px;
+            text-align: center;
+            margin-top: 0;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        /* Thanh tiến trình Neon */
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 10%;
+            height: 100%;
+            background: var(--primary-gradient);
+            box-shadow: 0 0 10px #ff007f;
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .status-text {
+            font-size: 13px;
+            text-align: right;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Hiệu ứng trượt mượt mà cho câu hỏi */
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #f8fafc;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .option-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #ff007f;
+            transform: scale(1.02); /* Hiệu ứng zoom nhẹ khi rê chuột cực cuốn */
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.15);
+        }
+
+        /* Trạng thái Đúng / Sai cá tính */
+        .option-item.correct {
+            background-color: var(--success-bg) !important;
+            border-color: var(--success-color) !important;
+            color: #032b14 !important;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+        }
+
+        .option-item.wrong {
+            background-color: var(--error-bg) !important;
+            border-color: var(--error-color) !important;
+            color: #4a0414 !important;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+
+        .disabled {
+            pointer-events: none;
+        }
+
+        /* Khung kết quả chất chơi */
+        .result-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .score-big {
+            font-size: 64px;
+            font-weight: 900;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+            filter: drop-shadow(0 2px 8px rgba(255, 0, 127, 0.3));
+        }
+
+        .btn-restart {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 16px;
+            border-radius: 50px; /* Nút kẹo dẻo bo tròn */
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 5px 20px rgba(127, 0, 255, 0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>NĂNG LỰC SÁNG TẠO ⚡ NGỮ VĂN 12</h1>
+    
+    <div class="status-text" id="statusText">Câu 1 / 10</div>
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div id="quizPages"></div>
+</div>
+
+<script>
+const quizData = [
+    { q: "Tác giả Phan Đình Diệu ví ý tưởng sáng tạo đột biến trong khoa học như hiện tượng gì?", a: "Ánh chớp", b: "Ngọn lửa", c: "Dòng sông", d: "Sóng ngầm", correct: "a" },
+    { q: "Theo bài viết, năng lực sáng tạo có phải là đặc quyền của riêng thiên tài không?", a: "Có, chỉ thiên tài mới sở hữu", b: "Không, đó là thuộc tính tự nhiên của mọi người", c: "Chỉ dành cho những nhà khoa học", d: "Chỉ dành cho giới văn nghệ sĩ", correct: "b" },
+    { q: "Yếu tố nào dưới đây KHÔNG phải là thành phần cấu thành năng lực sáng tạo dân tộc?", a: "Năng lực cá nhân", b: "Sức mạnh tổ chức", c: "Môi trường công nghệ", d: "Tài nguyên khoáng sản", correct: "d" },
+    { q: "Bản chất cốt lõi của hoạt động sáng tạo theo văn bản là gì?", a: "Sự sao chép rập khuôn", b: "Tìm ra cái mới và giá trị mới", c: "Làm theo số đông", d: "Sử dụng công nghệ sẵn có", correct: "b" },
+    { q: "Tác giả nhắc đến quy luật tỷ lệ nào trong lao động sáng tạo?", a: "50% cảm hứng và 50% lao động", b: "10% cảm hứng và 90% lao động", c: "1% cảm hứng và 99% lao động vất vả", d: "100% là do năng khiếu bẩm sinh", correct: "c" },
+    { q: "Yếu tố nào quyết định đến sức cạnh tranh của một quốc gia trong thời đại ngày nay?", a: "Năng lực sáng tạo và tri thức", b: "Diện tích lãnh thổ", c: "Số lượng lao động chân tay", d: "Vốn đầu tư thô", correct: "a" },
+    { q: "Muốn kích hoạt năng lực sáng tạo của mỗi cá nhân, xã hội cần tạo ra điều gì?", a: "Sự kiểm soát nghiêm ngặt", b: "Môi trường tự do, khuyến khích cái mới", c: "Sự rập khuôn trong giáo dục", d: "Các hình phạt khắt khe", correct: "b" },
+    { q: "Mối quan hệ giữa năng lực cá nhân và sức mạnh tổ chức trong sáng tạo là gì?", a: "Tách rời và độc lập nhau", b: "Cộng hưởng và tương tác hỗ trợ nhau", c: "Đối lập và bài trừ nhau", d: "Sức mạnh tổ chức triệt tiêu cá nhân", correct: "b" },
+    { q: "Thách thức lớn nhất đối với việc phát triển năng lực sáng tạo của học sinh hiện nay là gì?", a: "Thói quen học vẹt, rập khuôn và sợ sai", b: "Thiếu thốn hoàn toàn về công nghệ", c: "Học sinh không có trí thông minh", d: "Không có tài liệu tham khảo", correct: "a" },
+    { q: "Nhận định nào sau đây tổng quát nhất về thông điệp bài viết?", a: "Sáng tạo là chìa khóa của tương lai mỗi cá nhân và cả dân tộc", b: "Sáng tạo rất khó, không nên ép buộc", c: "Công nghệ là yếu tố duy nhất tạo nên sự sáng tạo", d: "Chỉ có người đứng đầu mới cần sáng tạo", correct: "a" }
+];
+
+let currentIdx = 0;
+let score = 0;
+
+const quizPagesContainer = document.getElementById('quizPages');
+const statusText = document.getElementById('statusText');
+const progressBar = document.getElementById('progressBar');
+
+function initQuiz() {
+    quizPagesContainer.innerHTML = '';
+    quizData.forEach((data, index) => {
+        const pageDiv = document.createElement('div');
+        pageDiv.className = `page ${index === 0 ? 'active' : ''}`;
+        pageDiv.id = `page-${index}`;
+
+        pageDiv.innerHTML = `
+            <div class="question-text">Câu ${index + 1}: ${data.q}</div>
+            <ul class="options-list">
+                <li class="option-item" data-choice="a" onclick="selectOption(this, 'a', ${index})">A. ${data.a}</li>
+                <li class="option-item" data-choice="b" onclick="selectOption(this, 'b', ${index})">B. ${data.b}</li>
+                <li class="option-item" data-choice="c" onclick="selectOption(this, 'c', ${index})">C. ${data.c}</li>
+                <li class="option-item" data-choice="d" onclick="selectOption(this, 'd', ${index})">D. ${data.d}</li>
+            </ul>
+        `;
+        quizPagesContainer.appendChild(pageDiv);
+    });
+    updateProgress();
+}
+
+function selectOption(element, choice, pageIdx) {
+    const currentPageDiv = document.getElementById(`page-${pageIdx}`);
+    const items = currentPageDiv.querySelectorAll('.option-item');
+const correctAns = quizData[pageIdx].correct;
+// Khóa không cho nhấn lại câu này
+items.forEach(item => item.classList.add('disabled'));
+if (choice === correctAns) {
+element.classList.add('correct');
+score++;
+} else {
+element.classList.add('wrong');
+// Hiện màu xanh cho phương án đúng để học sinh biết
+items.forEach(item => {
+if(item.getAttribute('data-choice') === correctAns) {
+item.classList.add('correct');
+}
+});
+}
+// Treo màn hình 1.2 giây để người dùng kịp quan sát kết quả rồi tự động chuyển câu
+setTimeout(() => {
+nextPage();
+}, 1200);
+}
+function nextPage() {
+const currentForm = document.getElementById(page-${currentIdx});
+if (currentIdx < quizData.length - 1) {
+currentForm.classList.remove('active');
+currentIdx++;
+const nextForm = document.getElementById(page-${currentIdx});
+nextForm.classList.add('active');
+updateProgress();
+} else {
+showResult();
+}
+}
+function updateProgress() {
+statusText.innerText = Câu ${currentIdx + 1} / ${quizData.length};
+const progressPercent = ((currentIdx + 1) / quizData.length) * 100;
+progressBar.style.width = ${progressPercent}%;
+}
+function showResult() {
+statusText.style.display = 'none';
+progressBar.parentElement.style.display = 'none';
+quizPagesContainer.innerHTML = <div class="result-screen"> <h2>Quá đỉnh! Bạn đã hoàn thành thử thách! 🔥</h2> <p>Kết quả check-in năng lực sáng tạo:</p> <div class="score-big">${score} / ${quizData.length}</div> <p style="margin-bottom: 25px; color: var(--text-secondary); font-weight: 600;">Tỷ lệ chính xác: ${(score/quizData.length * 100).toFixed(0)}%</p> <button class="btn-restart" onclick="window.location.reload()">Chơi Lại Phát Nữa 🔁</button> </div>;
+}
+window.onload = initQuiz;
